@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[PRESENTATION TITLE]</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+
+    /* ============================================================
+       1. DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --teal:           #1F6473;
+      --teal-dark:      #2a5563;
+      --teal-gradient:  linear-gradient(135deg, #3d6d7a 0%, #2a5563 100%);
+      --orange:         #E74314;
+      --orange-hover:   #B83712;
+      --orange-gradient:linear-gradient(135deg, #E74314 0%, #ff6b3d 100%);
+      --yellow:         #FFD166;
+      --bg-light:       #f8f9fa;
+      --bg-card:        linear-gradient(135deg, #f8fafb 0%, #ffffff 100%);
+      --text-primary:   #073540;
+      --text-dark:      #2a5563;
+      --text-body:      #2d3748;
+      --text-secondary: #4a5568;
+      --text-muted:     #6b7280;
+      --border:         #e5e7eb;
+      --shadow-subtle:  0 2px 8px rgba(0,0,0,0.05);
+      --shadow-std:     0 4px 12px rgba(0,0,0,0.08);
+      --shadow-elevated:0 8px 24px rgba(0,0,0,0.10);
+      --shadow-hover:   0 12px 32px rgba(0,0,0,0.12);
+      --radius-sm:      6px;
+      --radius-md:      12px;
+      --radius-lg:      16px;
+      --radius-full:    999px;
+    }
+
+    /* ============================================================
+       2. RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      font-family: 'Manrope', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       3. SCALE WRAPPER — centres & scales the 1280×720 deck
+       ============================================================ */
+    #scale-wrapper {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       4. SLIDE DECK — fixed 1280×720, scaled by JS
+       ============================================================ */
+    .slide-deck {
+      width: 1280px;
+      height: 720px;
+      position: relative;
+      transform-origin: center center;
+      /* scale is set dynamically by JS */
+    }
+
+    /* ============================================================
+       5. SLIDE BASE
+       ============================================================ */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      background: white;
+      animation: slideIn 0.35s ease both;
+    }
+
+    .slide.active { display: flex; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Slide number chip — bottom-right corner */
+    .slide-num {
+      position: absolute;
+      bottom: 14px;
+      right: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+      z-index: 2;
+    }
+
+    /* Dark slides — override slide-num color */
+    .slide-title   .slide-num,
+    .slide-section .slide-num,
+    .slide-conclusion .slide-num { color: rgba(255,255,255,0.35); }
+
+    /* ============================================================
+       6. LAYOUT: TITLE SLIDE (first slide)
+       ============================================================ */
+    .slide-title {
+      background: var(--teal-gradient);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 80px;
+      gap: 0;
+    }
+
+    .slide-title h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 60px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #ffffff;
+      max-width: 900px;
+      margin-bottom: 16px;
+    }
+
+    .slide-title .accent-bar {
+      width: 56px;
+      height: 4px;
+      background: var(--orange);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .slide-title .subtitle {
+      font-size: 20px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.82);
+      max-width: 680px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .slide-title .meta {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.4px;
+    }
+
+    /* ============================================================
+       7. LAYOUT: SECTION BREAK SLIDE
+       ============================================================ */
+    .slide-section {
+      background: var(--teal-gradient);
+      justify-content: center;
+      padding: 60px 80px;
+    }
+
+    .slide-section .section-num {
+      font-size: 96px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.08);
+      line-height: 0.9;
+      margin-bottom: -12px;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    .slide-section h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .slide-section .section-desc {
+      font-size: 18px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.72);
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* ============================================================
+       8. LAYOUT: CONTENT SLIDE (most slides)
+       ============================================================ */
+    .slide-content { background: #ffffff; }
+
+    /* Header bar */
+    .slide-header {
+      background: var(--teal-gradient);
+      padding: 18px 48px;
+      flex-shrink: 0;
+    }
+
+    .slide-header .slide-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 4px;
+    }
+
+    .slide-header h2 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    /* Body area */
+    .slide-body {
+      flex: 1;
+      padding: 32px 48px 44px;
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      overflow: hidden;
+    }
+
+    /* Two-column variants */
+    .slide-body.two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .slide-body.two-col-wide {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+    }
+
+    /* Column helper */
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ============================================================
+       9. LAYOUT: CONCLUSION SLIDE (last slide)
+       ============================================================ */
+    .slide-conclusion {
+      background: var(--teal-gradient);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 80px;
+      gap: 0;
+    }
+
+    .slide-conclusion h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      max-width: 800px;
+    }
+
+    .slide-conclusion .accent-bar {
+      width: 56px;
+      height: 4px;
+      background: var(--orange);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .slide-conclusion p {
+      font-size: 18px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.80);
+      max-width: 600px;
+      line-height: 1.65;
+      margin-bottom: 32px;
+    }
+
+    /* Orange CTA button (use inside conclusion or title slides) */
+    .cta-btn {
+      display: inline-block;
+      background: var(--orange-gradient);
+      color: #ffffff;
+      font-family: 'Manrope', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(231,67,20,0.35);
+      cursor: default;
+    }
+
+    /* ============================================================
+       10. COMPONENT: BULLET LIST
+       ============================================================ */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .bullet-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text-body);
+      line-height: 1.55;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .bullet-list li:nth-child(2) { animation-delay: 0.1s; }
+    .bullet-list li:nth-child(3) { animation-delay: 0.2s; }
+    .bullet-list li:nth-child(4) { animation-delay: 0.3s; }
+    .bullet-list li:nth-child(5) { animation-delay: 0.4s; }
+
+    .bullet-list li::before {
+      content: '';
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--orange);
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+
+    /* Sub-item (indent one level) */
+    .bullet-list .sub-item {
+      margin-left: 24px;
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .bullet-list .sub-item::before {
+      background: var(--border);
+      width: 6px;
+      height: 6px;
+      margin-top: 8px;
+    }
+
+    /* ============================================================
+       11. COMPONENT: STATS GRID
+       ============================================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      width: 100%;
+      align-self: center;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-std);
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.2s; }
+    .stat-card:nth-child(4) { animation-delay: 0.3s; }
+
+    .stat-card .stat-value {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 60px;
+      font-weight: 700;
+      color: var(--teal);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .stat-value span.unit {
+      font-size: 28px;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    .stat-card .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .stat-change {
+      font-size: 12px;
+      font-weight: 600;
+      color: #00695c;
+      background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+      border-radius: var(--radius-full);
+      padding: 2px 10px;
+      display: inline-block;
+    }
+
+    .stat-card .stat-change.down {
+      color: #c62828;
+      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    }
+
+    /* ============================================================
+       12. COMPONENT: FEATURE CARDS GRID
+       ============================================================ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      box-shadow: var(--shadow-std);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .feature-card:nth-child(2) { animation-delay: 0.1s; }
+    .feature-card:nth-child(3) { animation-delay: 0.2s; }
+    .feature-card:nth-child(4) { animation-delay: 0.3s; }
+
+    .feature-card .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--teal-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-dark);
+      line-height: 1.3;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ============================================================
+       13. COMPONENT: TIMELINE
+       ============================================================ */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.3s; }
+
+    .timeline-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+    }
+
+    .timeline-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--orange);
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 2px var(--orange);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-line {
+      width: 2px;
+      flex: 1;
+      min-height: 18px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .timeline-content {
+      flex: 1;
+      padding-bottom: 20px;
+    }
+
+    .timeline-content .tl-date {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 3px;
+    }
+
+    .timeline-content h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .timeline-content p {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       14. COMPONENT: BADGES / TAGS
+       ============================================================ */
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+      color: #00695c;
+      border: 1px solid rgba(0,105,92,0.25);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-orange {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+      color: #e65100;
+      border-color: rgba(230,81,0,0.25);
+    }
+
+    .badge-blue {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      color: #1565c0;
+      border-color: rgba(21,101,192,0.25);
+    }
+
+    /* ============================================================
+       15. COMPONENT: VISUAL PLACEHOLDER (image area)
+       ============================================================ */
+    .visual-placeholder {
+      background: linear-gradient(135deg, #f0f4f8 0%, #e8ecf0 100%);
+      border-radius: var(--radius-lg);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      min-height: 180px;
+    }
+
+    /* ============================================================
+       16. COMPONENT: HIGHLIGHT BOX (callout / pull-quote)
+       ============================================================ */
+    .highlight-box {
+      background: linear-gradient(135deg, #f0f7fa 0%, #e8f4f8 100%);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 20px 24px;
+    }
+
+    .highlight-box.orange {
+      background: linear-gradient(135deg, #fff5f0 0%, #fff0ea 100%);
+      border-left-color: var(--orange);
+    }
+
+    .highlight-box p {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-dark);
+      line-height: 1.55;
+      font-style: italic;
+    }
+
+    /* ============================================================
+       17. NAVIGATION BAR
+       ============================================================ */
+    .slide-nav {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(31, 100, 115, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-full);
+      padding: 7px 16px;
+      color: #ffffff;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      z-index: 200;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .slide-nav button {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #ffffff;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .slide-nav button:hover {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .slide-counter { min-width: 52px; text-align: center; font-weight: 500; }
+
+    /* ============================================================
+       18. ANIMATIONS
+       ============================================================ */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       19. PRINT / PDF STYLES (used by export-pdf.js)
+       ============================================================ */
+    @media print {
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      html, body {
+        width: 1280px;
+        overflow: visible;
+        background: transparent;
+      }
+
+      #scale-wrapper {
+        position: static;
+        display: block;
+        overflow: visible;
+        background: transparent;
+      }
+
+      .slide-deck {
+        width: 1280px;
+        height: auto;
+        transform: none !important;
+        position: static;
+        overflow: visible;
+      }
+
+      .slide {
+        display: flex !important;
+        position: relative;
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        page-break-after: always;
+        break-after: page;
+        animation: none !important;
+      }
+
+      .slide:last-child {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
+      .slide-nav { display: none !important; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     SLIDE DECK
+     - All slides are <section class="slide [type]"> elements.
+     - The first slide has class "active" — JS controls the rest.
+     - Replace ALL placeholder text below with your real content.
+     ================================================================ -->
+<div id="scale-wrapper">
+<div class="slide-deck" id="deck">
+
+
+  <!-- ── SLIDE 1: TITLE (always first) ──────────────────────────── -->
+  <section class="slide slide-title active">
+    <div class="slide-num">1 / 8</div>
+    <h1>Your Presentation<br>Title Here</h1>
+    <div class="accent-bar"></div>
+    <p class="subtitle">A concise subtitle or key message that frames the presentation in one sentence.</p>
+    <p class="meta">Presenter Name &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; AlterDomus</p>
+  </section>
+
+
+  <!-- ── SLIDE 2: SECTION BREAK ──────────────────────────────────── -->
+  <section class="slide slide-section">
+    <div class="slide-num">2 / 8</div>
+    <div class="section-num">01</div>
+    <h2>Section Title</h2>
+    <p class="section-desc">Brief description of what this section covers — one or two sentences, clear and direct.</p>
+  </section>
+
+
+  <!-- ── SLIDE 3: STANDARD CONTENT (bullets) ─────────────────────── -->
+  <section class="slide slide-content">
+    <div class="slide-num">3 / 8</div>
+    <div class="slide-header">
+      <div class="slide-tag">Key Finding</div>
+      <h2>Slide Title — Should Be the Conclusion</h2>
+    </div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li>First key point — lead with the insight, keep it to one line if possible</li>
+        <li>Second key point — quantify where you can ("reduced costs by 18%")</li>
+        <li>Third key point — use parallel sentence structure across bullets</li>
+        <li>Fourth key point — four to five bullets is the maximum for one slide</li>
+      </ul>
+    </div>
+  </section>
+
+
+  <!-- ── SLIDE 4: STATS / KPIs ───────────────────────────────────── -->
+  <section class="slide slide-content">
+    <div class="slide-num">4 / 8</div>
+    <div class="slide-header">
+      <div class="slide-tag">Performance</div>
+      <h2>Key Metrics at a Glance</h2>
+    </div>
+    <div class="slide-body" style="align-items: center;">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">AUM</div>
+          <div class="stat-value">$4.2<span class="unit">B</span></div>
+          <div class="stat-change">↑ 12% YoY</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Clients</div>
+          <div class="stat-value">320</div>
+          <div class="stat-change">↑ 8% YoY</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Retention Rate</div>
+          <div class="stat-value">96<span class="unit">%</span></div>
+          <div class="stat-change">+2pp YoY</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NPS Score</div>
+          <div class="stat-value">71</div>
+          <div class="stat-change">↑ from 64</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SLIDE 5: FEATURE CARDS ──────────────────────────────────── -->
+  <section class="slide slide-content">
+    <div class="slide-num">5 / 8</div>
+    <div class="slide-header">
+      <div class="slide-tag">Our Approach</div>
+      <h2>Three Pillars of Our Service Model</h2>
+    </div>
+    <div class="slide-body" style="align-items: center;">
+      <div class="cards-grid">
+        <div class="feature-card">
+          <div class="icon-box">⚙️</div>
+          <h3>Operational Excellence</h3>
+          <p>Streamlined fund administration with proprietary technology reducing time-to-NAV by 40%.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">🌐</div>
+          <h3>Global Reach</h3>
+          <p>Presence in 40+ jurisdictions with local regulatory expertise and on-the-ground teams.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">🔒</div>
+          <h3>Risk & Compliance</h3>
+          <p>Robust governance framework with dedicated compliance officers in each jurisdiction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SLIDE 6: TWO-COLUMN ─────────────────────────────────────── -->
+  <section class="slide slide-content">
+    <div class="slide-num">6 / 8</div>
+    <div class="slide-header">
+      <div class="slide-tag">Analysis</div>
+      <h2>Challenges vs. Our Response</h2>
+    </div>
+    <div class="slide-body two-col">
+      <div class="col">
+        <p style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;">Challenges</p>
+        <ul class="bullet-list" style="font-size:16px;">
+          <li>Regulatory fragmentation across jurisdictions</li>
+          <li>Investor demand for real-time reporting</li>
+          <li>Cost pressure on management fees</li>
+          <li>ESG data standardisation gaps</li>
+        </ul>
+      </div>
+      <div class="col">
+        <p style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;">Our Response</p>
+        <ul class="bullet-list" style="font-size:16px;">
+          <li>Centralised compliance hub with local expertise</li>
+          <li>Client portal with live dashboard access</li>
+          <li>Technology-led efficiency gains — 20% lower cost</li>
+          <li>Proprietary ESG data framework deployed Q1</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SLIDE 7: TIMELINE / ROADMAP ─────────────────────────────── -->
+  <section class="slide slide-content">
+    <div class="slide-num">7 / 8</div>
+    <div class="slide-header">
+      <div class="slide-tag">Roadmap</div>
+      <h2>2026 Strategic Priorities</h2>
+    </div>
+    <div class="slide-body">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker"><div class="timeline-dot"></div><div class="timeline-line"></div></div>
+          <div class="timeline-content">
+            <div class="tl-date">Q1 2026</div>
+            <h3>Platform Consolidation</h3>
+            <p>Migrate all client data to the unified AlterDomus Portal; decommission legacy systems.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"><div class="timeline-dot"></div><div class="timeline-line"></div></div>
+          <div class="timeline-content">
+            <div class="tl-date">Q2 2026</div>
+            <h3>APAC Expansion</h3>
+            <p>Open Singapore hub; hire 12 FTEs focused on private equity fund administration.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"><div class="timeline-dot"></div><div class="timeline-line"></div></div>
+          <div class="timeline-content">
+            <div class="tl-date">Q3–Q4 2026</div>
+            <h3>ESG Reporting Suite Launch</h3>
+            <p>Release automated ESG data ingestion and client-facing reporting module.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SLIDE 8: CONCLUSION (always last) ───────────────────────── -->
+  <section class="slide slide-conclusion">
+    <div class="slide-num">8 / 8</div>
+    <h2>Key Takeaway or<br>Call to Action</h2>
+    <div class="accent-bar"></div>
+    <p>Summarise the one message you want the audience to remember. Make it specific, actionable, and tied to a deadline or next step.</p>
+    <span class="cta-btn">Next Steps →</span>
+  </section>
+
+
+</div><!-- /.slide-deck -->
+</div><!-- /#scale-wrapper -->
+
+
+<!-- ================================================================
+     NAVIGATION BAR
+     ================================================================ -->
+<nav class="slide-nav" id="nav">
+  <button id="prevBtn" title="Previous (←)">&#8592;</button>
+  <span class="slide-counter" id="counter">1 / 8</span>
+  <button id="nextBtn" title="Next (→)">&#8594;</button>
+  <button id="fsBtn" title="Toggle fullscreen (F)" style="margin-left:4px;">&#x26F6;</button>
+</nav>
+
+
+<!-- ================================================================
+     JAVASCRIPT — Scale to fit + keyboard navigation
+     ================================================================ -->
+<script>
+  (function () {
+    const deck    = document.getElementById('deck');
+    const counter = document.getElementById('counter');
+    const slides  = Array.from(document.querySelectorAll('.slide'));
+    let   current = 0;
+
+    /* ── Scale deck to fit viewport ── */
+    function scaleSlides() {
+      const scale = Math.min(
+        window.innerWidth  / 1280,
+        window.innerHeight / 720
+      );
+      deck.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', scaleSlides);
+    scaleSlides();
+
+    /* ── Show a specific slide ── */
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      current = ((n % slides.length) + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      counter.textContent = `${current + 1} / ${slides.length}`;
+    }
+
+    /* ── Update counter on load ── */
+    counter.textContent = `1 / ${slides.length}`;
+
+    /* ── Button navigation ── */
+    document.getElementById('prevBtn').addEventListener('click', () => goTo(current - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => goTo(current + 1));
+
+    /* ── Fullscreen toggle ── */
+    const fsBtn = document.getElementById('fsBtn');
+    function updateFsIcon() {
+      fsBtn.textContent = document.fullscreenElement ? '✕' : '⛶';
+      fsBtn.title = document.fullscreenElement ? 'Exit fullscreen (F)' : 'Toggle fullscreen (F)';
+    }
+    fsBtn.addEventListener('click', toggleFs);
+    document.addEventListener('fullscreenchange', updateFsIcon);
+    function toggleFs() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    /* ── Keyboard navigation ── */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown'  || e.key === 'PageDown') goTo(current + 1);
+      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'    || e.key === 'PageUp')   goTo(current - 1);
+      if (e.key === 'f' || e.key === 'F') toggleFs();
+    });
+  })();
+</script>
+
+</body>
+</html>
