@@ -14,6 +14,17 @@ description: >
 
 # Exec Slides — HTML Presentation Skill
 
+## Before You Start: Load Supporting Skills
+
+Before doing anything else, invoke these two skills and follow their guidance throughout:
+
+1. **Invoke `scqa-framework`** — use it to structure the narrative (Situation → Complication → Question → Answer). The resulting SCQA spine determines slide order and story arc.
+2. **Invoke `presentation-writing`** — apply its writing standards to every slide: titles as conclusions, concise bullets, executive language.
+
+These skills shape the *content and structure*. This skill handles the *format and visual output*. Both are needed for a strong deck.
+
+---
+
 ## Step 0: Format Selection
 
 When the user asks for a presentation without specifying format, **always ask first**:
@@ -138,7 +149,7 @@ npm install -g puppeteer       # global
 
 ### Export command
 ```bash
-node "C:\Users\lauwersg\.claude\commands\exec-slides\scripts\export-pdf.js" presentation.html
+node "<this skill's directory>/scripts/export-pdf.js" presentation.html
 # → produces presentation.pdf in the same directory
 ```
 
@@ -154,6 +165,36 @@ page), and exports at **1280×720 px per page** (16:9 widescreen, matching Power
 If fonts cannot load from Google Fonts, substitute:
 - `DM Serif Display` → `Georgia, serif`
 - `Manrope` → `system-ui, -apple-system, sans-serif`
+
+---
+
+## PPTX Export (embedded images)
+
+After the HTML deck is finalised, **always ask the user**:
+
+> "Would you also like a PowerPoint (.pptx) version? Each slide will be embedded as a high-resolution image — layout is identical to the HTML, but the file is editable in PowerPoint (slides are read-only images, not editable text)."
+
+If yes, run:
+
+```bash
+node "<this skill's directory>/scripts/export-pptx.js" presentation.html
+# → produces presentation.pptx in the same directory
+```
+
+Pass an optional second argument for a custom output path:
+```bash
+node export-pptx.js deck.html "C:\Reports\Q4-exec-deck.pptx"
+```
+
+### How it works
+- Uses Puppeteer with a 1280×5000 px viewport (tall enough to render all slides in the scrollable page at once, no lazy-loading issues).
+- Screenshots each `.slide` element directly via `elementHandle.screenshot()` — this captures the element's bounding box regardless of body padding or scroll position, producing pixel-accurate 1280×720 captures at 2× device scale.
+- Hides the nav bar before capturing.
+- Embeds each screenshot as a full-bleed 13.33"×7.5" image in a 16:9 pptxgenjs slide.
+- **Do not use the old clip-based approach** (clipping at x:0, y:0 produces empty slides because the body has 48px top padding).
+
+### Dependencies
+`puppeteer` and `pptxgenjs` are both installed in `scripts/node_modules/` — no additional setup needed.
 
 ---
 
@@ -185,5 +226,7 @@ After generating, open the HTML in Chrome/Edge and verify:
 Always deliver **both files**:
 1. `[name].html` — the interactive presentation (open in Chrome/Edge for best experience).
 2. `[name].pdf` — the PDF export (run the Puppeteer script immediately after finalising the HTML).
+
+Then ask about PPTX (see **PPTX Export** section above).
 
 The nav bar includes a fullscreen button (⛶) — clicking it or pressing **F** toggles fullscreen mode.

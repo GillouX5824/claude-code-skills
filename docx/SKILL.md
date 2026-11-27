@@ -14,8 +14,6 @@ A `.docx` is a ZIP archive of XML files. Choose your approach by task:
 | **Edit** an existing document | unpack → edit `word/document.xml` → `zip` (docx-js cannot open existing files) |
 | **Read** content | `pandoc -t markdown file.docx` |
 
-> Script paths below are relative to this skill's directory.
-
 ## Template Selection
 
 **Before doing any work, ask the user which template to use** using `AskUserQuestion` with these options:
@@ -24,9 +22,11 @@ A `.docx` is a ZIP archive of XML files. Choose your approach by task:
 2. **Blank document** — Start from scratch with no template
 3. **Other** — Let the user provide a custom template path
 
-If a template is selected (option 1 or a custom path), follow [Editing existing documents](#editing-existing-documents): unpack the template, make modifications, then repack. This preserves the template's styles, headers, footers, and branding.
+If a template is selected (option 1 or a custom path), use the **Edit** approach: unpack the template, edit `word/document.xml`, then repack. This preserves the template's styles, headers, footers, and branding.
 
-If **Blank document** is selected, follow [Creating with docx-js](#creating-with-docx-js--gotchas).
+If **Blank document** is selected, use the **Create** approach with `docx-js`.
+
+> Script paths below are relative to this skill's directory.
 
 ## Creating with docx-js — gotchas
 

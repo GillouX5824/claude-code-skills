@@ -25,16 +25,20 @@ A `.pptx` is a ZIP archive of XML files. Choose your approach by task:
 - If they choose **HTML**: switch to the `exec-slides` skill.
 - If they choose **PPTX** (or have already specified it): continue below.
 
+---
+
 ## Company Template
 
 **When creating a new PPTX presentation**, before doing anything else, ask the user:
 
 > "Would you like to use the AlterDomus company template located at `C:\Users\lauwersg\OneDrive - AlterDomus\template AD.pptx`?"
 
-- If **yes**: use that file as the base template. Analyze it first with `thumbnail.py` and unpack it to understand its layouts, master slides, color scheme, and fonts. Apply the same branding throughout the new presentation. Follow [Editing existing decks and templates](#editing-existing-decks-and-templates).
-- If **no**: proceed without a template. Follow [Creating with pptxgenjs](#creating-with-pptxgenjs--gotchas) and apply your own design choices.
+- If **yes**: use that file as the base template. Analyze it first with `thumbnail.py` and unpack it to understand its layouts, master slides, color scheme, and fonts. Apply the same branding throughout the new presentation. Use the **Edit / build from a template** approach (unpack → edit slides → zip) and validate with `--original`.
+- If **no**: proceed without a template. Use the **Create** approach (`pptxgenjs`, structured deck) and apply your own design choices.
 
 Skip this question when the user has already provided a template or is editing/reading an existing file.
+
+---
 
 ## Scripts
 
